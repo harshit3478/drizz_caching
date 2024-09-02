@@ -1,0 +1,6 @@
+pillow
+keyboard
+pure-python-adb
+uiautomator2
+google-generativeai
+sentence-transformers
