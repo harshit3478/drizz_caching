@@ -42,3 +42,38 @@ Follow these steps to set up and run the project:
 
 9.  ### **Important Note**:
    Do not remove the empty folder in the project directory, as it is required for caching operations.
+
+## How does it work?
+
+-> For the first time, the user will provide the instructions to perform the automation task. The project will cache these instructions for future use.
+-> If the user wants to perform the same task again, it will be checked if the instructions are already cached. If they are, It will further perform more checks to make sure that it is the same screen and the same element.
+-> These can be found in caching.py file under the fuction check_if_cached().
+-> Approaches to check if the element is the same as the one cached is explained below.
+-> If the instructions are already cached, the project will reuse them to perform the automation task efficiently.
+
+
+## Approaches Used
+
+The project uses the following approaches to cache and reuse instructions:
+***(both of these approaches code can be find in target_elemen_finder.py file)***
+
+### - **Element node matching**:
+   1.In this approach, the target element is extracted from the cached xml file using tree traversal.
+   2.The element is then matched with the current elements on the screen using the calculate node similarity function in the graphOperations.py file.
+   3.If no elements found, function returns false. If one element is found, it returns true with coordinates of the element. If multiple elements are found, 
+   it traverse to the parent of target element and matched elements and again calculate the similarity. 
+   4.Again repeat the process until either no element is found or only one element is found.
+
+### - **Element matching with Image Similarity**:
+   1.In this approach, the target element is extracted from the cached xml file using tree traversal.
+   2.The element is then matched with the current elements on the screen using the find_best_matches function which search for the best match for the target element image in the current screen.
+   3.If no elements found, function returns false. If one element is found, it returns true with coordinates of the element. If multiple elements are found,
+   it traverse to the parent of target element and matched elements and again calculate the similarity.
+   4.Again repeat the process until either no element is found or only one element is found.
+
+   
+
+   The element is then matched with the current element on the screen using the element's attributes like resource-id, text, and content-desc
+
+
+
