@@ -1,0 +1,6 @@
+__pycache__
+*.pyc
+ui_*.xml
+screen.png
+*.json
+indexed_bounds.json
