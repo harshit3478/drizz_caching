@@ -11,6 +11,15 @@ import google.generativeai as genai
 class Utility:
 
     @staticmethod
+    def draw_bounding_boxes2(image_path, bounds , output_file_path):
+        image = Image.open(image_path)
+        draw = ImageDraw.Draw(image)
+        draw.rectangle([bounds['left'], bounds['top'], bounds['right'], bounds['bottom']], outline='green', width=2)
+        
+        #return image with bounding box save in 'output/'
+        image.save(output_file_path)
+    
+    @staticmethod
     def extract_coordinates(bounds):
         try:
             left_top, right_bottom = bounds.split('][')

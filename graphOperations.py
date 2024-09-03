@@ -10,7 +10,9 @@ class GraphOperations:
         :param root: The root node of the tree.
         :return: The parent node if found; otherwise, the root node or None.
         """
-        if node == root or node is None:
+        if node == root:
+            return None
+        if node is None:
             return root
         queue = [(root, None)]  # (current_node, parent_node)
         while queue:
@@ -31,7 +33,9 @@ class GraphOperations:
         :param root: The root node of the tree.
         :return: The parent node if found; otherwise, the root node or None.
         """
-        if node == root or node is None:
+        if node == root:
+            return None
+        if node is None:
             return root
         node_bounds = node.attrib.get('bounds')
         node_resource_id = node.attrib.get('resource-id')
@@ -62,7 +66,20 @@ class GraphOperations:
             for child in current_node:
                 queue.append(child)
         return length
-    
+    @staticmethod
+    def verticle_depth(element , root):
+        if element == root:
+            return 0
+        if element is None:
+            return -1
+        queue = [(root, 0)]
+        while queue:
+            current_node, depth = queue.pop(0)
+            if current_node == element:
+                return depth
+            for child in current_node:
+                queue.append((child, depth + 1))
+        return -1
     @staticmethod
     def extract_text_from_element(element):
         """
@@ -190,8 +207,8 @@ class GraphOperations:
         :param node2: The second XML element.
         :return: A float representing the similarity score based on bounds size (0.0 to 1.0).
         """
-        bounds1 = Utility.extract_coordinates(node1.get('bounds'))
-        bounds2 = Utility.extract_coordinates(node2.get('bounds'))
+        bounds1 = Utility.extract_coordinates(node1.attrib.get('bounds'))
+        bounds2 = Utility.extract_coordinates(node2.attrib.get('bounds'))
 
         if not bounds1 or not bounds2:
             return 0.0

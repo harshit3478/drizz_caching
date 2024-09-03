@@ -55,39 +55,57 @@ class Cache:
         for document in feeds:
             # Calculate similarity scores
             task_similarity = CV.similarity_score(  task , document['instruction'])
+            if task_similarity < 0.60:
+                continue
+            
             activity_similarity = CV.similarity_score( activity_name, document['activity_name'])
-            image_similarity = CV.image_match( imagePath, document['image'])
+            if activity_similarity < 0.99:
+                continue
+            # image_similarity = CV.image_match( imagePath, document['image'])
+            cropped_image_similarity = CV.cropped_image_match(imagePath , document['image'], document['element_bounds'])
+            # if cropped_image_similarity < 0.99:
+            #     continue
+            # if image_similarity < 0.50:
+            #     continue
+            
             if config.DEBUG:
                 print('task similarity :' , task_similarity , ' for cached task :', document['instruction'])
                 print('activity similarity :' , activity_similarity , ' for cached activity :', document['activity_name'])
-                print('image similarity :' , image_similarity, ' for cached image :', document['image'])
-            # Check for high similarity in all aspects
-            if task_similarity > 0.50 and activity_similarity > 0.99 and image_similarity > 0.60:
-                # Check for matching target element 
-                #approach 1
-                # is_match , action_coords = TEF.find_target_element_approach_1(
-                #     document['xml_path'],
-                #     'ui_hierarchy.xml',
-                #     document['element_bounds']['node']
-                # )
-                #approach 2                
-                is_match, action_coords = TEF.find_target_element_approach_2(
-                    document['xml_path'],
-                    'ui_hierarchy.xml',
-                    document['element_bounds']['node'],
-                    document['image'],
-                    'screen.png'
+                # print('image similarity :' , image_similarity, ' for cached image :', document['image'])
+                print('cropped image similarity :' , cropped_image_similarity, ' for cached image :', document['image'])
+           
+            # Check for matching target element 
+            #approach 1
+            # is_match , action_coords = TEF.find_target_element_approach_1(
+            #     document['xml_path'],
+            #     'ui_hierarchy.xml',
+            #     document['element_bounds']['node']
+            # )
+            #approach 2                
+            # is_match, action_coords = TEF.find_target_element_approach_2(
+            #     document['xml_path'],
+            #     'ui_hierarchy.xml',
+            #     document['element_bounds']['node'],
+            #     document['image'],
+            #     'screen.png'
+            # )
+            
+            #approach 3
+            is_match, action_coords = TEF.find_target_element_approach3(
+                document['element_bounds']['node'],
+                document['image'],
+                'screen.png',
+                document['xml_path'],
+                'ui_hierarchy.xml'
                 )
 
-                if is_match:
-                    print("Task found in cache and executed successfully")
-                    Utility.execute_task(document['action'], document['payload'],
-                                str(action_coords['x']), str(action_coords['y']))
-                    return True
+            if is_match:
+                print("Task found in cache and executed successfully")
+                Utility.execute_task(document['action'], document['payload'],
+                            str(action_coords['x']), str(action_coords['y']))
+                return True
 
             # If any similarity is below threshold, continue to next document
-            if task_similarity < 0.90 or activity_similarity < 0.99 or image_similarity < 0.95:
-                continue
 
         print("Task not found in cache")
         return False

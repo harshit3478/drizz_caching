@@ -1,8 +1,11 @@
+import random
 import time
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import cv2
 from skimage.metrics import structural_similarity as ssim
+import config
+import numpy as np
 from utils import Utility
 
 class Computervision:
@@ -76,17 +79,63 @@ class Computervision:
         end = time.time()
         print("Time taken for cropped image match:", end - start)
 
-        action_coords = {
-            "left": max_loc[0],
-            "top": max_loc[1],
-            "right": max_loc[0] + w,
-            "bottom": max_loc[1] + h
-        }
+        return float(score)
 
-        if float(score) > 0.9:
-            return action_coords, True
-        return float(score), False
+        
 
+    def match_two_cropped_images(self, image_path1, image_path2, bounds1, bounds2, index , save = False):
+        """Matches two cropped images.
+
+        Args:
+            image_path1 (str): The path to the first image.
+            image_path2 (str): The path to the second image.
+            bounds1 (dict): The bounding box of the first cropped region.
+            bounds2 (dict): The bounding box of the second cropped region.
+
+        Returns:
+            tuple: A tuple containing the SSIM score
+        
+        """
+        
+        # start = time.time()
+        image1 = cv2.imread(image_path1)
+        image2 = cv2.imread(image_path2)
+
+        cropped_image1 = image1[bounds1["top"]:bounds1["bottom"], bounds1["left"]:bounds1["right"]]
+        cropped_image2 = image2[bounds2["top"]:bounds2["bottom"], bounds2["left"]:bounds2["right"]]
+
+        gray_cropped1 = cv2.cvtColor(cropped_image1, cv2.COLOR_BGR2GRAY)
+        gray_cropped2 = cv2.cvtColor(cropped_image2, cv2.COLOR_BGR2GRAY)
+
+        if config.DEBUG and save:
+            # draw bounding boxes around the bounds on both images for debugging 
+            
+            Utility.draw_bounding_boxes2(image_path1, bounds1, 'output/image1.png')
+            Utility.draw_bounding_boxes2(image_path2, bounds2, 'output/image2.png')
+            image1 = cv2.imread('output/image1.png')
+            image2 = cv2.imread('output/image2.png')
+            image1_np = np.array(image1)
+            image2_np = np.array(image2)
+
+            # add them horizontally
+            if image1 is not None and image2 is not None:
+                image = cv2.hconcat([image1_np, image2_np])
+            # save into output folder for debugging
+            #gen random string of 10 characters
+            string = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+            randStr = ''.join(random.choices(string, k = 10))
+            cv2.imwrite("output/" + "image.png", image)
+            
+        if gray_cropped1.shape != gray_cropped2.shape:
+            return 0.0
+        score, _ = ssim(gray_cropped1, gray_cropped2, full=True)
+        # end = time.time()
+        # print("Time taken for cropped image match:", end - start)
+
+        return float(score)
+        
+        
+        
     def match_vicinity(self, image_path1, image_path2, bounds, factor=1):
         """Matches the vicinity of a target element in an image.
 
